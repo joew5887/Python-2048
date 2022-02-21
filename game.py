@@ -181,7 +181,7 @@ class Board:
 
         return grid
 
-    def move_horizontal(self, direction: str) -> Board:
+    def move_horizontal(self, direction: str) -> tuple[Board, int]:
         coords_in_set = []
 
         for i in range(self.__shape.x):
@@ -204,7 +204,7 @@ class Board:
 
         return self._move(coords_in_set)
 
-    def move_vertical(self, direction: str) -> Board:
+    def move_vertical(self, direction: str) -> tuple[Board, int]:
         coords_in_set = []
 
         for i in range(self.__shape.x):
@@ -231,6 +231,8 @@ class Board:
         tiles = [self[coord] for coord in coords if not self[coord].is_empty()]
         num_empty = len(coords) - len(tiles)
         tiles_added = []
+        tiles_added: list[Tile]
+        score_for_row = 0
 
         i = 0
         j = 0
@@ -245,6 +247,7 @@ class Board:
 
             tiles_added.append(curr_tile + next_tile)
             if not (tiles_added[j] == curr_tile):
+                score_for_row += tiles_added[j].value
                 num_empty += 1
                 i += 1
 
@@ -257,18 +260,20 @@ class Board:
         for coord, tile in zip(coords, tiles_added):
             self[coord] = tile
 
-        return self
+        return self, score_for_row
 
-    def _move(self, coords_rows: list[list[tuple[int, int]]]) -> Board:
+    def _move(self, coords_rows: list[list[tuple[int, int]]]) -> tuple[Board, int]:
         new = deepcopy(self)
+        score_for_move = 0
 
         for coords in coords_rows:
-            new = new._move_row(coords)
+            new, score = new._move_row(coords)
+            score_for_move += score
 
         if new == self:
             raise NoMoveError
 
-        return new
+        return new, score_for_move
 
     @property
     def all_tiles(self) -> list[Union[EmptyTile, Tile]]:
@@ -320,18 +325,19 @@ class State:
     def __repr__(self) -> str:
         return f"State({self.__board.__repr__()})"
 
-    def move(self, direction: str) -> Union[State, Exception]:
+    def move(self, direction: str) -> Union[tuple[State, int], Exception]:
         if direction not in MOVES:
             raise Exception("Unknown move")
 
         if direction in ["u", "d"]:
-            new_board = self.__board.move_vertical(direction)
+            new_board, score_retrieved = self.__board.move_vertical(direction)
         else:
-            new_board = self.__board.move_horizontal(direction)
+            new_board, score_retrieved = self.__board.move_horizontal(
+                direction)
 
         new_board.add_random_tile(1)
 
-        return State(new_board, self)
+        return State(new_board, self), score_retrieved
 
     def no_child_state(self) -> bool:
         for move in MOVES:
@@ -383,7 +389,8 @@ class Game:
         self.__score = score
 
     def move(self, direction: str) -> Optional[Exception]:
-        self.state = self.state.move(direction)
+        self.state, score_received = self.state.move(direction)
+        self.score += score_received
 
     def is_over(self) -> bool:
         return self.state.no_child_state()
