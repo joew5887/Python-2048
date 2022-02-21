@@ -23,6 +23,10 @@ class Interface(ABC):
     def no_move_msg(self) -> str:
         pass
 
+    @abstractmethod
+    def endgame_sequence(self):
+        pass
+
     def run(self) -> None:
         while (not self._game.is_over()):
             self.show()
@@ -35,3 +39,5 @@ class Interface(ABC):
                 self.move(direction)
             except NoMoveError:
                 self.no_move_msg()
+
+        self.endgame_sequence()

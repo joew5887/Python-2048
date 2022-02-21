@@ -19,6 +19,9 @@ class Screen(Interface):
     def no_move_msg(self) -> str:
         print("Cannot do that move.")
 
+    def endgame_sequence(self):
+        print(f"Game Over. Score = {self._game.score}")
+
 
 if __name__ == "__main__":
     x = Screen()
