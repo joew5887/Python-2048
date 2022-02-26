@@ -323,6 +323,9 @@ class State:
     def __repr__(self) -> str:
         return f"State({self.__board.__repr__()})"
 
+    def __getitem__(self, idx: tuple[int, int]) -> Union[EmptyTile, Tile]:
+        return self.__board[idx]
+
     def move(self, direction: str) -> Union[tuple[State, int], Exception]:
         if direction not in MOVES:
             raise Exception("Unknown move")
