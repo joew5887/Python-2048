@@ -1,6 +1,5 @@
 from abc import abstractmethod, ABC
-from game import Game, NoMoveError
-from typing import Any
+from logic import Game, NoMoveError
 
 
 class Interface(ABC):
@@ -11,9 +10,8 @@ class Interface(ABC):
     def show(self) -> None:
         pass
 
-    @abstractmethod
     def move(self, direction: str) -> None:
-        pass
+        self._game.move(direction)
 
     @abstractmethod
     def retrieve_input(self) -> str:
