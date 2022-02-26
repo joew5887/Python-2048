@@ -84,6 +84,9 @@ class EmptyTile(Tile):
     def __repr__(self) -> str:
         return "EmptyTile()"
 
+    def __str__(self) -> str:
+        return ""
+
     @overload
     def __add__(self, other: EmptyTile) -> tuple[EmptyTile, EmptyTile]: ...
 
