@@ -51,17 +51,6 @@ class Tile:
 
         raise NotImplementedError
 
-        '''if isinstance(other, EmptyTile):
-            return (other, self)
-
-        if isinstance(other, Tile):
-            if self == other:
-                return (EmptyTile(), Tile(self.value + other.value))
-
-            return (self, other)
-
-        raise NotImplementedError'''
-
     @property
     def value(self) -> int:
         return self.__value
@@ -96,11 +85,9 @@ class EmptyTile(Tile):
     def __add__(self, other: Any) -> NotImplementedError:
         if isinstance(other, EmptyTile):
             return self
-            # return (other, self)
 
         if isinstance(other, Tile):
             return other
-            # return (self, other)
 
         raise NotImplementedError
 
@@ -181,11 +168,11 @@ class Board:
     def move_horizontal(self, direction: str) -> tuple[Board, int]:
         coords_in_set = []
 
-        for i in range(self.__shape.x):
+        for x in range(self.__shape.x):
             row = []
 
-            for j in range(self.__shape.y):
-                row.append((i, j))
+            for y in range(self.__shape.y):
+                row.append((x, y))
 
             if direction == "r":
                 row = row[::-1]
@@ -204,11 +191,11 @@ class Board:
     def move_vertical(self, direction: str) -> tuple[Board, int]:
         coords_in_set = []
 
-        for i in range(self.__shape.x):
+        for y in range(self.__shape.y):
             row = []
 
-            for j in range(self.__shape.y):
-                row.append((j, i))
+            for x in range(self.__shape.x):
+                row.append((x, y))
 
             if direction == "d":
                 row = row[::-1]
@@ -346,7 +333,7 @@ class State:
     def no_child_state(self) -> bool:
         for move in MOVES:
             try:
-                new_state = self.move(move)
+                self.move(move)
             except NoMoveError:
                 continue
             else:

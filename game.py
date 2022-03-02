@@ -3,7 +3,7 @@ from interface import Interface
 from logic import MOVES, NoMoveError, Tile
 
 DIRECTIONS = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
-KEY_TO_DIRECTION = dict(zip(DIRECTIONS, MOVES))
+KEY_TO_DIRECTION = dict(zip(DIRECTIONS, MOVES))  # {pygame.K_UP: 'u', ...}
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -19,6 +19,19 @@ pygame.init()
 
 
 def tile_to_colour(tile_value: int) -> tuple[int, int, int]:
+    """
+    Gets the tile colour based on it's value.
+
+    Parameters
+    ---
+    tile_value (int): Numerical value of the tile. Used to retrieve the right colour.
+
+    Returns
+    ---
+    colour (tuple[int, int, int]): RGB colour.
+
+    """
+
     colour = TILE_COLOURS.get(tile_value)
 
     if colour is None:
@@ -32,24 +45,38 @@ class Tile:
         self.__tile = tile
         self.__colour = tile_to_colour(self.__tile.value)
 
-    def draw(self, window: pygame.Surface, x_start: int, y_start: int, x_size: int, y_size: int) -> pygame.Surface:
+    def draw(self, window: pygame.Surface, x_start: int, y_start: int, side: int) -> pygame.Surface:
         pygame.draw.rect(window, self.__colour,
-                         (x_start, y_start, x_size, y_size))
-        font = pygame.font.Font(None, 50)
+                         (x_start, y_start, side, side))
+        font_size = int(side / 2)
+        font = pygame.font.Font(None, font_size)
         text = font.render(str(self.__tile), True, BLACK)
-        text_rect = text.get_rect(center=(x_start+x_size/2, y_start+y_size/2))
+        text_rect = text.get_rect(center=(x_start+side/2, y_start+side/2))
         window.blit(text, text_rect)
 
         return window
 
 
 class Board(Interface):
-    def __init__(self, side: int = 500):
-        super().__init__()
-        self.__win = pygame.display.set_mode((side, side))
-        self._game.coords
-        self._game.shape
-        pygame.display.set_caption("Game")
+    def __init__(self, tiles_x: int, tiles_y: int, tile_size: int, spacer_size: int):
+        super().__init__(tiles_x, tiles_y)
+        self.__draw(tile_size, spacer_size)
+
+    def __draw(self, tile_size: int, spacer_size: int) -> None:
+        self.__tile_size = tile_size
+        self.__spacer_size = spacer_size
+        self.__y_shift = self.__tile_size / 2
+        side_x = self.__tile_start_seq(self._game.shape.y)
+        side_y = self.__tile_start_seq(self._game.shape.x)
+        self.__shape = (side_x, self.__y_shift + side_y)
+        self.__win = pygame.display.set_mode(self.__shape)
+        pygame.display.set_caption("2048")
+
+    def __tile_start_seq(self, tile_num: int) -> int:
+        d = self.__tile_size + self.__spacer_size
+        a = self.__spacer_size
+
+        return a + d*tile_num
 
     def __update_tiles(self) -> dict[tuple[int, int], Tile]:
         tiles = {}
@@ -64,18 +91,20 @@ class Board(Interface):
         self.__win.fill(BLACK)
         tiles = self.__update_tiles()
 
-        for x in range(self._game.shape.x):
-            for y in range(self._game.shape.y):
-                x_start = 100*y + 20
-                y_start = 100*x + 20
+        font_size = int(self.__tile_size / 2)
+        font = pygame.font.Font(None, font_size)
+        text = font.render(f'Score: {self._game.score}', True, WHITE, BLACK)
+        self.__win.blit(text, (self.__spacer_size, self.__spacer_size))
+
+        for y in range(self._game.shape.y):
+            for x in range(self._game.shape.x):
+                x_start = self.__tile_start_seq(y)
+                y_start = self.__tile_start_seq(x) + self.__y_shift
                 tile = tiles[(x, y)]
-                self.__win = tile.draw(self.__win, x_start, y_start, 90, 90)
+                self.__win = tile.draw(
+                    self.__win, x_start, y_start, self.__tile_size)
 
-    def retrieve_input(self, events: list) -> str:
-        for event in events:
-            if event.type == pygame.QUIT:
-                self.endgame_sequence()
-
+    def retrieve_input(self) -> str:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_UP]:
@@ -97,15 +126,20 @@ class Board(Interface):
 
     def run(self) -> None:
         while (not self._game.is_over()):
-            pygame.time.delay(80)
+            pygame.time.delay(120)
 
             self.show()
-            direction = self.retrieve_input(pygame.event.get())
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.endgame_sequence()
+
+            direction = self.retrieve_input()
 
             if direction is not None:
+                print(direction)
                 try:
                     self.move(direction)
-                    print(self._game)
                 except NoMoveError:
                     self.no_move_msg()
 
@@ -115,5 +149,5 @@ class Board(Interface):
 
 
 if __name__ == "__main__":
-    game = Board()
+    game = Board(10, 10, 80, 10)
     game.run()

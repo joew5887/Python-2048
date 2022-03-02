@@ -3,8 +3,8 @@ from logic import Game, NoMoveError
 
 
 class Interface(ABC):
-    def __init__(self):
-        self._game = Game()
+    def __init__(self, tiles_x: int, tiles_y: int):
+        self._game = Game(tiles_x, tiles_y)
 
     @abstractmethod
     def show(self) -> None:
