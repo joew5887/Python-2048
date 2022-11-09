@@ -1,8 +1,10 @@
 # 2048-Solver
-AI player for the game "2048".
 
-Note:
+## What is it?
+AI player for the game "2048" in Python.
 
-Currently only the game is present.
+Inspired by: https://github.com/gabrielecirulli/2048
 
-Can be played either through the terminal or pygame.
+Game information is available at: https://en.wikipedia.org/wiki/2048_(video_game)
+
+Can be played either through the terminal or `pygame`.

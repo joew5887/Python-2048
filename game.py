@@ -58,7 +58,7 @@ class Tile:
 
 
 class Board(Interface):
-    def __init__(self, tiles_x: int, tiles_y: int, tile_size: int, spacer_size: int):
+    def __init__(self, tiles_x: int, tiles_y: int, tile_size: int = 80, spacer_size: int = 10):
         super().__init__(tiles_x, tiles_y)
         self.__draw(tile_size, spacer_size)
 
@@ -148,6 +148,10 @@ class Board(Interface):
         self.endgame_sequence()
 
 
-if __name__ == "__main__":
-    game = Board(10, 10, 80, 10)
+def main() -> None:
+    game = Board(4, 4)
     game.run()
+
+
+if __name__ == "__main__":
+    main()
